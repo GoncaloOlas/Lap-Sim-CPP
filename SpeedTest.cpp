@@ -59,8 +59,8 @@ int main()
     }else{
       motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
     }
-    float downForce = 0.5 * rho * frontalArea * liftCoef * (velocity*velocity);
-    float dragForce = 0.5 * rho * frontalArea * dragCoef * (velocity*velocity);
+    float downForce = 0.5 * rho * frontalArea * liftCoef * pow(velocity, 2.0);
+    float dragForce = 0.5 * rho * frontalArea * dragCoef * pow(velocity, 2.0);
     float wheelTorque = motorTorque * finalDriveRatio;
     float force = wheelTorque / tireRadius;
     float normalForce = mass * gravity + downForce;

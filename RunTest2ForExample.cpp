@@ -48,6 +48,7 @@ float distance = 0.0;
 
 int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
 {
+  std::ofstream writer("OutputRun\\Velocity.txt");
   float perimeter1 = 2 * M_PI * turn1Rad;
   while(distance <= perimeter1){
     if(rpmTire < maxRpmMotor){
@@ -71,95 +72,46 @@ int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
     float normalForceTotal = normalFrontForce + normalRearForce;
 
     float MaxLatTireForce = normalForceTotal * frictionCoef;
-
-    float MaxCornerSpeed = sqrt((MaxLatTireForce / mass) * turn1Rad); //velocidade maxima na curva
-    float MaxLatForce = mass * pow(velocity, 2.0) / turn1Rad; //Lateral force
-    float LatForce = std::min(MaxCornerSpeed, MaxLatForce);
+    float MaxCornerSpeed = sqrt((MaxLatTireForce / mass) * turn1Rad); //velocidade maxima na curva em relacao ao pneu
+    //std::cout<<"normal Force Total: "<<normalForceTotal<<std::endl;
+    float MaxLatForce = mass * pow(velocity, 2.0) / turn1Rad; //Lateral force para a velocidade atual
+    //std::cout<<"Velocity: "<<velocity<<std::endl;
+    //std::cout<<"Max Lat Force: "<<MaxLatForce<<std::endl;
+    float LatForce = std::min(MaxLatTireForce, MaxLatForce);
     float LatAccel = LatForce / mass;
+
     //std::cout<<"Lat Accel: "<<LatAccel<<std::endl;
     //std::cout<<"\n\n"<<std::endl;
-    float forceFrictionLimitLong = sqrt((1-(LatForce / MaxLatTireForce)) * (1-(LatForce / MaxLatTireForce))
-    * ((normalRearForce * muLong) * (normalRearForce * muLong)));
+
+    float forceFrictionLimitLong = sqrt(pow(((1-(LatForce / MaxLatTireForce)) * (1-(LatForce / MaxLatTireForce))), 2.0)
+    * pow(((normalRearForce * muLong) * (normalRearForce * muLong)), 2.0));
+
+    //std::cout<<"forceFrictionLimitLong: "<<forceFrictionLimitLong<<std::endl;
+    //std::cout<<"Wheel Force: "<<wheelForce<<std::endl;
+
     float ForceLongCP = std::min(forceFrictionLimitLong, wheelForce);
     float ForceLongNet = ForceLongCP - dragForce;
     float LongAccel = ForceLongNet / mass;
+
     //std::cout<<"Longitudinal Accel: "<<LongAccel<<std::endl;
-    if(MaxCornerSpeed < sqrt(pow(velocity, 2.0) * 2 * LongAccel * dd))
+
+    if(MaxCornerSpeed < sqrt(pow(velocity, 2.0) + (2 * LongAccel * dd)))
     {
       velocity = MaxCornerSpeed;
-      LatAccel = 0;
     }else
     {
-      velocity = sqrt(pow(velocity, 2.0) * 2 * LongAccel * dd);
+      velocity = sqrt(pow(velocity, 2.0) + (2 * LongAccel * dd));
     }
-    velocity += (LongAccel * timeStep);
+
     distance += (velocity * timeStep);
     timer += timeStep;
+    writer<<velocity*3.6<<std::endl;
     //std::cout<<"Distance is: "<<distance<<std::endl;
   }
+  writer.close();
   return timer;
 }
-/*
-int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad){
-std::ofstream writer("OutputRun\\Velocity.txt");
 
-
-float perimeter1 = 2 * M_PI * turn1Rad;
-float perimeter2 = 2 * M_PI * turn2Rad;
-velocity = sqrt(GtoGRadius * gravity * turn1Rad);
-while(distance <= perimeter1){
-if(rpmTire < maxRpmMotor){
-rpmTire = (velocity /tirePerimeter) * 60 * finalDriveRatio;
-}else{
-rpmTire = maxRpmMotor;
-}
-motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
-if(motorTorque > 240){
-motorTorque = 240;
-}else{
-motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
-}
-float downForce = 0.5 * rho * frontalArea * liftCoef * (velocity*velocity);
-float dragForce = 0.5 * rho * frontalArea * dragCoef * (velocity*velocity);
-float wheelTorque = motorTorque * finalDriveRatio;
-float force = wheelTorque / tireRadius;
-float normalForce = mass * gravity + downForce;
-float frictionForce = frictionCoef * normalForce;
-float motorExactPower = motorPower / velocity;
-float motorForce = std::min(force, motorExactPower);
-float realForce = std::min(frictionForce, motorForce) - dragForce;
-float acceleration = realForce / mass;
-
-velocity
-
-distance += (velocity * timeStep);
-timer += timeStep;
-std::cout<<distance<<std::endl;
-/*
-float Corner1Force = (mass * (velocity * velocity)) / turn1Rad;
-float Corner2Force = (mass * (velocity * velocity)) / turn2Rad;
-
-float acceleration1 = Corner1Force / mass;
-//float acceleration2 = Corner2Force / mass;
-
-velocity = (acceleration1 * timeStep);
-distance += (velocity * timeStep);
-timer += timeStep;
-std::cout<<velocity<<std::endl;
-writer<<velocity<<std::endl;
-//std::cout<<acceleration1<<std::endl;
-
-}
-
-
-//float VelApex1 = sqrt(GtoGRadius * gravity * turn1Rad);
-//float VelApex2 = sqrt(GtoGRadius * gravity * turn2Rad);
-
-writer.close();
-std::cout<<"Cornering"<<std::endl;
-return timer;
-}
-*/
 int straightLine(float finalDistance)
 {
   while(finalDistance >= distance)
@@ -185,8 +137,8 @@ int straightLine(float finalDistance)
     float force = wheelTorque / tireRadius;
     float normalForce = mass * gravity + downForce;
     float frictionForce = frictionCoef * normalForce;
-    float motorExactPower = motorPower / velocity;
-    float motorForce = std::min(force, motorExactPower);
+    float motorExactForce = motorPower / velocity;
+    float motorForce = std::min(force, motorExactForce);
     float realForce = std::min(frictionForce, motorForce) - dragForce;
     float acceleration = realForce / mass;
 
