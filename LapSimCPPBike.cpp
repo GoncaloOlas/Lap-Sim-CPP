@@ -31,13 +31,13 @@ float dragCoef = 0.5;
 float liftCoef = 0.12;
 float frontalArea = 1.02;
 float tireRadius = 0.2286;
-float finalDriveRatio = 3.155;
+float finalDriveRatio = 3.38;
 float accVoltage = 399.0;
 float rpmCoef = 470.0 / 5170.0;
 float motorPower = 80000.0;
 float maxRpmMotor = accVoltage / rpmCoef;
 float tirePerimeter = 2 * M_PI * tireRadius;
-float CG_long = 0.45;  // Rear Wheight distribution
+float CG_long = 0.45;  // Rear Weight distribution
 float CP_long = 0.54;  // percent rear
 float CG_vert = 0.300;
 float WheelBase = 1.56;
@@ -139,33 +139,6 @@ int straightLine(float finalDistance)
 
     float realMotorForce = std::min(wheelForce, motorExactPower);
     float contactPatchForce = std::min(realMotorForce, frictionForce);
-    /*
-    float normalFrontForce = (mass * gravity * (1 - CG_long)) + (downForce * (1 - CP_long));
-    float normalRearForce = (mass * gravity * CG_long) + (downForce * CP_long);
-    float normalForceTotal = normalFrontForce + normalRearForce;
-
-    float MaxLatTireForce = normalForceTotal * frictionCoef;
-
-    float MaxCornerSpeed = sqrt(MaxLatTireForce / mass * turn1Rad);
-    float MaxLatVelocity = mass * pow(velocity, 2.0) / turn1Rad;
-    float LatForce = std::min(MaxCornerSpeed, MaxLatVelocity);
-    float LatAccel = LatForce / mass;
-
-    float forceFrictionLimitLong = sqrt((1-(LatForce / MaxLatTireForce)) * (1-(LatForce / MaxLatTireForce))
-    * ((normalRearForce * muLong) * (normalRearForce * muLong)));
-    float ForceLongCP = std::min(forceFrictionLimitLong, wheelForce);
-    float ForceLongNet = ForceLongCP - dragForce;
-    float LongAccel = ForceLongNet / mass;
-
-    float normalForce = mass * gravity + downForce;
-    float frictionForce = frictionCoef * normalForce;
-    float motorExactPower = motorPower / velocity;
-    float motorForce = std::min(wheelForce, motorExactPower);
-    float realForce = std::min(frictionForce, motorForce) - dragForce;
-    float acceleration = realForce / mass;
-    */
-
-    //float acceleration = (muLong * gravity) + (((0.5 * rho * frontalArea * ((muLong * liftCoef) - dragCoef)) * pow(velocity, 2.0))/mass);
 
     float accelerationPowerLimited = (contactPatchForce - dragForce) / mass;
 
