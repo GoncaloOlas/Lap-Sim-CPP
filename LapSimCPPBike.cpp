@@ -59,25 +59,43 @@ float motorTorque = 0.0;
 float rpmTire = 0.0;
 float velocity = 0.0;
 float distance = 0.0;
-/*
-int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
+
+int Braking()
+{
+  float TurnRadius = 0.0;
+  float SectorLenght = 0.0;
+  float AvailableBrakingForce = sqrt((pow(muLong, 2.0) * pow(TurnRadius, 2.0)) - ((pow(mass, 2.0) * pow(velocity, 4.0))/pow(TurnRadius, 2.0)));
+  float dragForce = 0.5 * rho * frontalArea * dragCoef * pow(velocity, 2.0);
+  float TotalDecelForce = AvailableBrakingForce + dragForce;
+  float Deceleration = TotalDecelForce / mass;
+  float MaximumEntrySpeed = sqrt(pow(velocity, 2.0) + (2 * Deceleration * SectorLenght));
+  return 0;
+}
+
+
+int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad, float &timer, float &StateOfCharge)
 {
   float perimeter1 = 2 * M_PI * turn1Rad;
   while(distance <= perimeter1){
+    float MechMotorPower = (accVoltage / sqrt(2.0)) * sqrt(3.0) * RMSCurrent * PFactor;
+    float CtrlPowerLoss = (0.00554 * pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
+    float MotorPowerLoss = pow(RMSCurrent, 2.0) * MotorPhaseResistance;
+    float AccPowerLoss = pow(RMSCurrent, 2.0) * AccResistance;
+    float motorPower = MechMotorPower - CtrlPowerLoss - MotorPowerLoss - AccPowerLoss;
     if(rpmTire < maxRpmMotor){
       rpmTire = (velocity /tirePerimeter) * 60 * finalDriveRatio;
     }else{
       rpmTire = maxRpmMotor;
     }
     motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
-    if(motorTorque > 240){
-      motorTorque = 240;
+    if(motorTorque > 230){
+      motorTorque = 230;
     }else{
       motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
     }
-    float downForce = 0.5 * rho * frontalArea * liftCoef * (velocity*velocity);
-    float dragForce = 0.5 * rho * frontalArea * dragCoef * (velocity*velocity);
-    float wheelTorque = motorTorque * finalDriveRatio;
+    float downForce = 0.5 * rho * frontalArea * liftCoef * pow(velocity, 2.0);
+    float dragForce = 0.5 * rho * frontalArea * dragCoef * pow(velocity, 2.0);
+    float wheelTorque = motorTorque * finalDriveRatio * DrivetrainEffic;
     float wheelForce = wheelTorque / tireRadius;
 
     float normalFrontForce = (mass * gravity * (1 - CG_long)) + (downForce * (1 - CP_long));
@@ -86,8 +104,11 @@ int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
 
     float MaxLatTireForce = normalForceTotal * frictionCoef;
 
-    float MaxCornerSpeed = sqrt(MaxLatTireForce / mass * turn1Rad);
-    float MaxLatVelocity = mass * (velocity * velocity) / turn1Rad;
+    float WingArea = 0.0;
+    float WingDragCoef = 0.0;
+    float MaxCornerSpeed = sqrt((frictionCoef * mass * gravity) / ((sqrt(pow(mass / turn1Rad, 2.0) + pow((0.5 * rho * ((frontalArea * dragCoef) + (WingArea * WingDragCoef))), 2.0))) - (0.5 * frictionCoef * rho * WingArea * liftCoef)));
+
+    float MaxLatVelocity = mass * pow(velocity, 2.0) / turn1Rad;
     float LatForce = std::min(MaxCornerSpeed, MaxLatVelocity);
     float LatAccel = LatForce / mass;
 
@@ -96,32 +117,31 @@ int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
     float ForceLongCP = std::min(forceFrictionLimitLong, wheelForce);
     float ForceLongNet = ForceLongCP - dragForce;
     float LongAccel = ForceLongNet / mass;
-    std::cout<<"Longitudinal Accel: "<<LongAccel<<std::endl;
-    if(MaxCornerSpeed < sqrt((velocity *velocity) * 2 * LongAccel * dd))
+    if(MaxCornerSpeed < sqrt(pow(velocity, 2.0) * 2 * LongAccel * dd))
     {
       velocity = MaxCornerSpeed;
       LatAccel = 0;
     }else
     {
-      velocity = sqrt((velocity *velocity) * 2 * LongAccel * dd);
+      velocity = sqrt(pow(velocity, 2.0) * 2 * LongAccel * dd);
     }
     velocity += (LongAccel * timeStep);
     distance += (velocity * timeStep);
     timer += timeStep;
-    std::cout<<distance<<std::endl;
+    StateOfCharge -= 0.0277 * timeStep;
   }
-  return timer;
+  return 0;
 }
-*/
+
 int straightLine(float finalDistance, float &timer, float &StateOfCharge)
 {
   while(finalDistance >= distance)
   {
     float MechMotorPower = (accVoltage / sqrt(2.0)) * sqrt(3.0) * RMSCurrent * PFactor;
-    float PowerLossCtrl = (0.00554 * pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
+    float CtrlPowerLoss = (0.00554 * pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
     float MotorPowerLoss = pow(RMSCurrent, 2.0) * MotorPhaseResistance;
     float AccPowerLoss = pow(RMSCurrent, 2.0) * AccResistance;
-    float motorPower = MechMotorPower - PowerLossCtrl - MotorPowerLoss - AccPowerLoss;
+    float motorPower = MechMotorPower - CtrlPowerLoss - MotorPowerLoss - AccPowerLoss;
     if(rpmTire < maxRpmMotor)
     {
       rpmTire = (velocity /tirePerimeter) * 60 * finalDriveRatio;
@@ -170,7 +190,7 @@ int straightLine(float finalDistance, float &timer, float &StateOfCharge)
 int main()
 {
   auto t1 = std::chrono::high_resolution_clock::now();
-  int mode = 1; // 1 == accel run, 2 == track run
+  int mode = 2; // 1 == accel run, 2 == SkidPad
   switch(mode)
   {
     case 1:
@@ -187,7 +207,7 @@ int main()
       float turn1Rad = 9.125;
       float turn2Rad = 9.125;
 
-      //Cornering(segment1, segment2, turn1Rad, turn2Rad);
+      Cornering(segment1, segment2, turn1Rad, turn2Rad, timer, StateOfCharge);
       break;
     }
   }
