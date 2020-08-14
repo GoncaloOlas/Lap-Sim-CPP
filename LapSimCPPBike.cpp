@@ -6,9 +6,10 @@
 #include <fstream>
 
 //Simulation parameters
-float timeStep = 0.0001; //seconds
+float timeStep = 0.001; //seconds
 float timer = 0.0;
 float GtoGRadius = 2.0;
+float StateOfCharge = 20.0; // Ah
 
 //enviromental parameters
 float gravity = 9.81;
@@ -34,7 +35,6 @@ float tireRadius = 0.2286;
 float finalDriveRatio = 3.38;
 float accVoltage = 399.0;
 float rpmCoef = 470.0 / 5170.0;
-float motorPower = 80000.0;
 float maxRpmMotor = accVoltage / rpmCoef;
 float tirePerimeter = 2 * M_PI * tireRadius;
 float CG_long = 0.45;  // Rear Weight distribution
@@ -44,13 +44,22 @@ float WheelBase = 1.56;
 float FrontTrack = 1.180;
 float RearTrack = 1.160;
 float RollingDrag = 100.0; // For accuracy should be changed to 200 + (250 * pow(LateralGs, 2.0))
+float RMSCurrent = 172.5;
+float PFactor = 0.94;
+float MotorPhaseResistance = 0.007;
+float MaxCurrent = 350.0;
+float cellResistance = 0.003;
+float AccCellNr = 95.0;
+float AccResistance = cellResistance * AccCellNr;
+float DrivetrainEffic = 0.85;
+float BatteryCap = 20.0; // Ah
 
 
 float motorTorque = 0.0;
 float rpmTire = 0.0;
 float velocity = 0.0;
 float distance = 0.0;
-
+/*
 int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
 {
   float perimeter1 = 2 * M_PI * turn1Rad;
@@ -103,11 +112,16 @@ int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad)
   }
   return timer;
 }
-
-int straightLine(float finalDistance)
+*/
+int straightLine(float finalDistance, float &timer, float &StateOfCharge)
 {
   while(finalDistance >= distance)
   {
+    float MechMotorPower = (accVoltage / sqrt(2.0)) * sqrt(3.0) * RMSCurrent * PFactor;
+    float PowerLossCtrl = (0.00554 * pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
+    float MotorPowerLoss = pow(RMSCurrent, 2.0) * MotorPhaseResistance;
+    float AccPowerLoss = pow(RMSCurrent, 2.0) * AccResistance;
+    float motorPower = MechMotorPower - PowerLossCtrl - MotorPowerLoss - AccPowerLoss;
     if(rpmTire < maxRpmMotor)
     {
       rpmTire = (velocity /tirePerimeter) * 60 * finalDriveRatio;
@@ -116,15 +130,14 @@ int straightLine(float finalDistance)
       rpmTire = maxRpmMotor;
     }
     motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
-    if(motorTorque > 240)
+    if(motorTorque > 230.0)
     {
-      motorTorque = 240;
+      motorTorque = 230.0;
     }else
     {
       motorTorque = motorPower / ((rpmTire * 2 * M_PI) / 60);
     }
-
-    float wheelTorque = motorTorque * finalDriveRatio;
+    float wheelTorque = motorTorque * finalDriveRatio * DrivetrainEffic;
     float wheelForce = wheelTorque / tireRadius;
 
     float downForce = 0.5 * rho * frontalArea * liftCoef * pow(velocity,2.0);
@@ -149,8 +162,9 @@ int straightLine(float finalDistance)
     velocity += (acceleration * timeStep);
     distance += (velocity * timeStep);
     timer += timeStep;
+    StateOfCharge -= 0.0277 * timeStep;
   }
-  return timer;
+  return 0;
 }
 
 int main()
@@ -162,7 +176,7 @@ int main()
     case 1:
     {
       float finalDistance = 75.0;
-      straightLine(finalDistance);
+      straightLine(finalDistance, timer, StateOfCharge);
       break;
     }
     case 2:
@@ -173,11 +187,12 @@ int main()
       float turn1Rad = 9.125;
       float turn2Rad = 9.125;
 
-      Cornering(segment1, segment2, turn1Rad, turn2Rad);
+      //Cornering(segment1, segment2, turn1Rad, turn2Rad);
       break;
     }
   }
   std::cout<<"Accel time: "<<timer<<std::endl;
+  std::cout<<"Accumulator Capacity: "<<StateOfCharge * accVoltage<<std::endl;
   auto t2 = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
   std::cout<<"Program Run time: "<<duration/1000<<std::endl; // milliseconds
