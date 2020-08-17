@@ -16,12 +16,14 @@ float gravity = 9.81;
 float rho = 1.162;
 
 //Track parameters
+/*
 float segment1 = 10.0;
 float segment2 = 10.0;
 float turn1Rad = 50.0;
 float turn2Rad = 100.0;
 float perimeter1 = 2 * M_PI *turn1Rad;
 float perimeter2 = 2 * M_PI *turn2Rad;
+*/
 float dd = 1.0;
 
 //vehicle parameters
@@ -62,18 +64,24 @@ float distance = 0.0;
 
 int Braking()
 {
-  float TurnRadius = 0.0;
-  float SectorLenght = 0.0;
+  float TurnRadius = 93.0;
+  float SectorLenght = 100.0;
   float AvailableBrakingForce = sqrt((pow(muLong, 2.0) * pow(TurnRadius, 2.0)) - ((pow(mass, 2.0) * pow(velocity, 4.0))/pow(TurnRadius, 2.0)));
   float dragForce = 0.5 * rho * frontalArea * dragCoef * pow(velocity, 2.0);
   float TotalDecelForce = AvailableBrakingForce + dragForce;
   float Deceleration = TotalDecelForce / mass;
   float MaximumEntrySpeed = sqrt(pow(velocity, 2.0) + (2 * Deceleration * SectorLenght));
+  std::cout<<"Maximum Entry speed: "<<MaximumEntrySpeed*3.6<<std::endl;
   return 0;
 }
 
+int TrackDrive()
+{
 
-int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad, float &timer, float &StateOfCharge)
+return 0;
+}
+
+int Cornering(float turn1Rad, float &timer, float &StateOfCharge)
 {
   float perimeter1 = 2 * M_PI * turn1Rad;
   while(distance <= perimeter1){
@@ -107,7 +115,6 @@ int Cornering(float segment1, float segment2, float turn1Rad, float turn2Rad, fl
     float WingArea = 0.0;
     float WingDragCoef = 0.0;
     float MaxCornerSpeed = sqrt((frictionCoef * mass * gravity) / ((sqrt(pow(mass / turn1Rad, 2.0) + pow((0.5 * rho * ((frontalArea * dragCoef) + (WingArea * WingDragCoef))), 2.0))) - (0.5 * frictionCoef * rho * WingArea * liftCoef)));
-
     float MaxLatVelocity = mass * pow(velocity, 2.0) / turn1Rad;
     float LatForce = std::min(MaxCornerSpeed, MaxLatVelocity);
     float LatAccel = LatForce / mass;
@@ -190,7 +197,7 @@ int straightLine(float finalDistance, float &timer, float &StateOfCharge)
 int main()
 {
   auto t1 = std::chrono::high_resolution_clock::now();
-  int mode = 2; // 1 == accel run, 2 == SkidPad
+  int mode = 2; // 1 == accel run, 2 == SkidPad, 3 == TrackRuns
   switch(mode)
   {
     case 1:
@@ -202,16 +209,30 @@ int main()
     case 2:
     {
       //Track parameters
-      float segment1 = 500.0;
-      float segment2 = 500.0;
       float turn1Rad = 9.125;
-      float turn2Rad = 9.125;
 
-      Cornering(segment1, segment2, turn1Rad, turn2Rad, timer, StateOfCharge);
+      Cornering(turn1Rad, timer, StateOfCharge);
+      break;
+    }
+    case 3:
+    {
+      /*
+      float finalDistance = 75.0;
+      straightLine(finalDistance, timer, StateOfCharge);
+
+      float turn1Rad = 9.125;
+      Cornering(turn1Rad, timer, StateOfCharge);
+
+      finalDistance = 75.0;
+      straightLine(finalDistance, timer, StateOfCharge);
+
+      turn1Rad = 9.125;
+      Cornering(turn1Rad, timer, StateOfCharge);
+      */
       break;
     }
   }
-  std::cout<<"Accel time: "<<timer<<std::endl;
+  std::cout<<"Lap time: "<<timer<<std::endl;
   std::cout<<"Accumulator Capacity: "<<StateOfCharge * accVoltage<<std::endl;
   auto t2 = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
