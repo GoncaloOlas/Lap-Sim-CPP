@@ -13,6 +13,7 @@ int Cornering(float Turn1Radius, float SectorLenght, float &timer, float &StateO
 float timeStep = 0.001; //seconds
 float timer = 0.0;
 float StateOfCharge = 20.0; // Ah
+float current_distance = 0.0;
 
 //enviromental parameters
 float gravity = 9.81;
@@ -195,25 +196,24 @@ int straightLine(float finalDistance, float &timer, float &StateOfCharge, float 
   return 0;
 }
 
-int TrackDrive(float &timer)
+int TrackDrive(float &timer, float &run_distance)
 {
   float powerPercentage = 0.5;
   RMSCurrent = RMSCurrent * powerPercentage;
 
+while(current_distance < run_distance){
   float finalDistance = 75;
   straightLine(finalDistance, timer, StateOfCharge, velocity);
-  std::cout<<"Timer value after straight: "<<timer<<std::endl;
 
   float Turn1Radius = 10.0;
   float SectorLenght = 20.0;
 
   Braking(Turn1Radius, SectorLenght, timer, velocity);
-  std::cout<<"Timer value after brake: "<<timer<<std::endl;
-  std::cout<<"Corner entry Speed: "<<velocity*3.6<<" km/h"<<std::endl;
 
   Cornering(Turn1Radius, SectorLenght, timer, StateOfCharge, velocity);
-  std::cout<<"Timer value after corner: "<<timer<<std::endl;
 
+  current_distance += SectorLenght + finalDistance;
+}
   return 0;
 }
 
@@ -239,7 +239,8 @@ int main()
     }
     case 3:
     {
-      TrackDrive(timer);
+      float run_distance = 22000;
+      TrackDrive(timer, run_distance);
       break;
     }
   }
