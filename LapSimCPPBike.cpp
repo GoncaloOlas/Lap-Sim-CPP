@@ -244,7 +244,8 @@ int main()
       break;
     }
   }
-  std::cout<<"Lap time: "<<timer<<std::endl;
+  std::cout<<"Lap time: "<<timer<<" seconds"<<std::endl;
+  std::cout<<"Lap time: "<<timer/60<<" minutes"<<std::endl;
   std::cout<<"Accumulator Capacity: "<<StateOfCharge * accVoltage<<std::endl;
   auto t2 = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
