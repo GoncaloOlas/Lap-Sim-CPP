@@ -85,6 +85,10 @@ int Braking(float Turn1Radius, float SectorLenght, float &timer, float &velocity
 int Cornering(float Turn1Radius, float SectorLenght, float &timer, float &StateOfCharge, float &velocity)
 {
   float distanceCorner = 0.0;
+  std::ofstream vel_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/cornering_output/velocity.txt");
+  std::ofstream accel_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/cornering_output/acceleration.txt");
+  std::ofstream torque_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/cornering_output/torque.txt");
+  std::ofstream force_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/cornering_output/normal_force.txt");
   while(distanceCorner <= SectorLenght){
     float MechMotorPower = (accVoltage / sqrt(2.0)) * sqrt(3.0) * RMSCurrent * PFactor;
     float CtrlPowerLoss = (0.00554 * pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
@@ -137,13 +141,27 @@ int Cornering(float Turn1Radius, float SectorLenght, float &timer, float &StateO
     distanceCorner += (velocity * timeStep);
     timer += timeStep;
     StateOfCharge -= 0.0277 * timeStep;
+    vel_writer<<velocity*3.6<<"km/h"<<std::endl;
+    accel_writer<<LongAccel<<"m/s^2"<<std::endl;
+    torque_writer<<wheelTorque<<"N.m"<<std::endl;
+    force_writer<<normalForceTotal<<"N"<<std::endl;
   }
+  vel_writer.close();
+  accel_writer.close();
+  torque_writer.close();
+  force_writer.close();
   return 0;
 }
 
 int straightLine(float finalDistance, float &timer, float &StateOfCharge, float &velocity)
 {
   float distanceStraight = 0.0;
+
+  std::ofstream vel_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/accel_output/velocity.txt");
+  std::ofstream accel_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/accel_output/acceleration.txt");
+  std::ofstream torque_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/accel_output/torque.txt");
+  std::ofstream force_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/accel_output/normal_force.txt");
+
   while(finalDistance >= distanceStraight)
   {
     float MechMotorPower = (accVoltage / sqrt(2.0)) * sqrt(3.0) * RMSCurrent * PFactor;
@@ -192,7 +210,16 @@ int straightLine(float finalDistance, float &timer, float &StateOfCharge, float 
     distanceStraight += (velocity * timeStep);
     timer += timeStep;
     StateOfCharge -= 0.0277 * timeStep;
+
+    vel_writer<<velocity*3.6<<"km/h"<<std::endl;
+    accel_writer<<acceleration<<"m/s^2"<<std::endl;
+    torque_writer<<wheelTorque<<"N.m"<<std::endl;
+    force_writer<<normalForceTotal<<"N"<<std::endl;
   }
+  vel_writer.close();
+  accel_writer.close();
+  torque_writer.close();
+  force_writer.close();
   return 0;
 }
 
@@ -200,7 +227,7 @@ int TrackDrive(float &timer, float &run_distance)
 { 
   float powerPercentage = 0.5;
   RMSCurrent = RMSCurrent * powerPercentage;
-  
+  std::ofstream time_writer("/home/go/Documents/C++_Projects/lap_sim_cpp/track_run_output/setup.txt");
 while(current_distance < run_distance){
   float finalDistance = 75;
   straightLine(finalDistance, timer, StateOfCharge, velocity);
@@ -214,6 +241,11 @@ while(current_distance < run_distance){
 
   current_distance += SectorLenght + finalDistance;
 }
+  time_writer<<run_distance/1000.0<<"km"<<std::endl;
+  time_writer<<RMSCurrent<<"A"<<std::endl;
+  time_writer<<StateOfCharge<<"kWh"<<std::endl;
+  time_writer<<timer<<"sec"<<std::endl;
+  time_writer.close();
   return 0;
 }  
 
