@@ -62,12 +62,10 @@ int Braking(float Turn1Radius, float SectorLenght, float &timer, float &velocity
   float TotalDecelForce = AvailableBrakingForce + dragForce;
   float Deceleration = TotalDecelForce / mass;
   //MaximumEntrySpeed = sqrt(pow(velocity, 2.0) + (2 * Deceleration * SectorLenght));
-  
   float WingArea = 0.0;
   float WingDragCoef = 0.0;
   float MaximumEntrySpeed = sqrt((frictionCoef * mass * gravity) / ((sqrt(pow(mass / Turn1Radius, 2.0) + pow((0.5 * rho * ((frontalArea * dragCoef) + (WingArea * WingDragCoef))), 2.0))) - (0.5 * frictionCoef * rho * WingArea * liftCoef)));
   float initial_vel = velocity;
-
   if(velocity > MaximumEntrySpeed)
   {
     velocity = MaximumEntrySpeed;
@@ -75,7 +73,6 @@ int Braking(float Turn1Radius, float SectorLenght, float &timer, float &velocity
   {
     velocity = velocity;
   }
-
   float final_vel = velocity;
   float braking_distance = (pow(initial_vel, 2.0) - pow(final_vel, 2.0))/(2*Deceleration);
   timer += (initial_vel - final_vel) / Deceleration;
@@ -275,6 +272,7 @@ int main()
       TrackDrive(timer, run_distance);
       break;
     }
+    default:{break;}
   }
   std::cout<<"Lap time: "<<timer<<" seconds"<<std::endl;
   std::cout<<"Lap time: "<<timer/60<<" minutes"<<std::endl;
