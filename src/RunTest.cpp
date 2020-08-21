@@ -62,7 +62,7 @@ int Braking(float Turn1Radius, float SectorLenght, float &timer, float &velocity
   float TotalDecelForce = AvailableBrakingForce + dragForce;
   float Deceleration = TotalDecelForce / mass;
   //MaximumEntrySpeed = sqrt(pow(velocity, 2.0) + (2 * Deceleration * SectorLenght));
-
+  
   float WingArea = 0.0;
   float WingDragCoef = 0.0;
   float MaximumEntrySpeed = sqrt((frictionCoef * mass * gravity) / ((sqrt(pow(mass / Turn1Radius, 2.0) + pow((0.5 * rho * ((frontalArea * dragCoef) + (WingArea * WingDragCoef))), 2.0))) - (0.5 * frictionCoef * rho * WingArea * liftCoef)));
@@ -197,10 +197,10 @@ int straightLine(float finalDistance, float &timer, float &StateOfCharge, float 
 }
 
 int TrackDrive(float &timer, float &run_distance)
-{
+{ 
   float powerPercentage = 0.5;
   RMSCurrent = RMSCurrent * powerPercentage;
-
+  
 while(current_distance < run_distance){
   float finalDistance = 75;
   straightLine(finalDistance, timer, StateOfCharge, velocity);
@@ -215,7 +215,7 @@ while(current_distance < run_distance){
   current_distance += SectorLenght + finalDistance;
 }
   return 0;
-}
+}  
 
 int main()
 {
