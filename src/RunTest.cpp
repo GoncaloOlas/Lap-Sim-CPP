@@ -249,7 +249,7 @@ while(current_distance < run_distance){
 int main()
 {
   auto t1 = std::chrono::high_resolution_clock::now();
-  int mode = 3; // 1 == accel run, 2 == SkidPad, 3 == TrackRuns
+  int mode = 1; // 1 == accel run, 2 == SkidPad, 3 == TrackRuns
   switch(mode)
   {
     case 1:
