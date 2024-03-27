@@ -43,7 +43,7 @@ This project aims to provide a comprehensive lap simulation tool written in C++,
 
 1. Customize the simulation parameters in the appropriate files (e.g., `constants.hpp`).
 
-2. Choose the desired simulation mode in `main.cpp` (e.g., acceleration run, skid pad, track run).
+2. Choose the desired simulation mode in `run.cpp` (e.g., acceleration run, skid pad, track run).
 
 3. Run the executable:
 
