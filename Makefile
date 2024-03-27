@@ -4,8 +4,8 @@
 
 # Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++11 -Wall
-LDFLAGS = 
+CXXFLAGS = -std=c++20 -Wall -Iinclude
+LDFLAGS =
 
 # Makefile settings - Can be customized.
 APPNAME = TrackRun
@@ -35,9 +35,9 @@ all: $(APPNAME)
 $(APPNAME): $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Creates the dependecy rules
+# Creates the dependency rules
 %.d: $(SRCDIR)/%$(EXT)
-	@$(CPP) $(CFLAGS) $< -MM -MT $(@:%.d=$(OBJDIR)/%.o) >$@
+	@$(CC) $(CXXFLAGS) $< -MM -MT $(@:%.d=$(OBJDIR)/%.o) >$@
 
 # Includes all .h files
 -include $(DEP)
