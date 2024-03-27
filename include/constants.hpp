@@ -36,7 +36,8 @@ constexpr float AccCellNr = 95.0;
 constexpr float AccResistance = cellResistance * AccCellNr;
 constexpr float DrivetrainEffic = 0.85;
 constexpr float BatteryCap = 20.0; // Ah
-
+constexpr float WingArea = 0.0;
+constexpr float WingDragCoef = 0.0;
 constexpr float timeStep = 0.001; // seconds
 
 #endif // CONSTANTS_HPP

@@ -1,41 +1,6 @@
 #include "constants.hpp"
 #include "utils.hpp"
 
-float calculateWheelTorque(float motorPower, float rpmTire, float finalDriveRatio)
-{
-    return calcWheelTorque(motorPower, rpmTire) * finalDriveRatio;
-}
-
-float calculateDownForce(float velocity, float rho, float frontalArea, float liftCoef)
-{
-    return calcDownForce(velocity);
-}
-
-float calculateDragForce(float velocity, float rho, float frontalArea, float dragCoef)
-{
-    return calcDragForce(velocity);
-}
-
-float calculateNormalFrontForce(float mass, float gravity, float CG_long, float CP_long, float downForce)
-{
-    return calcNormalFrontForce(downForce);
-}
-
-float calculateNormalRearForce(float mass, float gravity, float CG_long, float CP_long, float downForce)
-{
-    return calcNormalRearForce(downForce);
-}
-
-float calculateAcceleration(float contactPatchForce, float mass)
-{
-    return calcAcceleration(contactPatchForce, mass);
-}
-
-float calculateMaxCornerSpeed(float frictionCoef, float mass, float gravity, float Turn1Radius, float rho, float frontalArea, float dragCoef, float WingArea, float WingDragCoef, float liftCoef)
-{
-    return calcMaxCornerSpeed(Turn1Radius, WingArea, WingDragCoef);
-}
-
 void writeOutput(std::ofstream &vel_writer, std::ofstream &accel_writer, std::ofstream &torque_writer, std::ofstream &force_writer, float velocity, float LongAccel, float wheelTorque, float normalForceTotal)
 {
     vel_writer << velocity * 3.6 << "km/h" << std::endl;
@@ -69,22 +34,22 @@ int cornering(float Turn1Radius, float SectorLength, float &timer, float &StateO
         rpmTire = std::min(rpmTire, maxRpmMotor);
 
         // Calculate wheel torque
-        float wheelTorque = calculateWheelTorque(motorPower, rpmTire, finalDriveRatio);
+        float wheelTorque = calcWheelTorque(motorPower, rpmTire) * finalDriveRatio;
         
         // Calculate down force and drag force
-        float downForce = calculateDownForce(velocity, rho, frontalArea, liftCoef);
-        float dragForce = calculateDragForce(velocity, rho, frontalArea, dragCoef);
+        float downForce = calcDownForce(velocity);
+        float dragForce = calcDragForce(velocity);
         
         // Calculate normal forces
-        float normalFrontForce = calculateNormalFrontForce(mass, gravity, CG_long, CP_long, downForce);
-        float normalRearForce = calculateNormalRearForce(mass, gravity, CG_long, CP_long, downForce);
+        float normalFrontForce = calcNormalFrontForce(downForce);
+        float normalRearForce = calcNormalRearForce(downForce);
         float normalForceTotal = calcNormalForceTotal(normalFrontForce, normalRearForce);
 
         // Calculate maximum lateral tire force
         float MaxLatTireForce = normalForceTotal * frictionCoef;
 
         // Calculate maximum corner speed
-        float MaxCornerSpeed = calculateMaxCornerSpeed(frictionCoef, mass, gravity, Turn1Radius, rho, frontalArea, dragCoef, 0.0, 0.0, liftCoef);
+        float MaxCornerSpeed = calcMaxCornerSpeed(Turn1Radius, WingArea, WingDragCoef);
         
         // Calculate lateral force and acceleration
         float MaxLatVelocity = mass * std::pow(velocity, 2.0) / Turn1Radius;
