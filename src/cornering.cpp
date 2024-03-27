@@ -1,26 +1,6 @@
 #include "constants.hpp"
 #include "utils.hpp"
 
-float calculateMotorPower(float accVoltage, float RMSCurrent, float PFactor)
-{
-    return (accVoltage / std::sqrt(2.0)) * std::sqrt(3.0) * RMSCurrent * PFactor;
-}
-
-float calculateTotalPowerLoss(float accVoltage, float RMSCurrent)
-{
-    return (0.00554 * std::pow(accVoltage, 0.85029) * RMSCurrent) + 211.5;
-}
-
-float calculateMotorPowerLoss(float RMSCurrent, float MotorPhaseResistance)
-{
-    return std::pow(RMSCurrent, 2.0) * MotorPhaseResistance;
-}
-
-float calculateAccPowerLoss(float RMSCurrent, float AccResistance)
-{
-    return std::pow(RMSCurrent, 2.0) * AccResistance;
-}
-
 float calculateWheelTorque(float motorPower, float rpmTire, float finalDriveRatio)
 {
     return calcWheelTorque(motorPower, rpmTire) * finalDriveRatio;
@@ -53,7 +33,7 @@ float calculateAcceleration(float contactPatchForce, float mass)
 
 float calculateMaxCornerSpeed(float frictionCoef, float mass, float gravity, float Turn1Radius, float rho, float frontalArea, float dragCoef, float WingArea, float WingDragCoef, float liftCoef)
 {
-    return calcMaxCornerSpeed(frictionCoef, mass, gravity, Turn1Radius, rho, frontalArea, dragCoef, WingArea, WingDragCoef, liftCoef);
+    return calcMaxCornerSpeed(Turn1Radius, WingArea, WingDragCoef);
 }
 
 void writeOutput(std::ofstream &vel_writer, std::ofstream &accel_writer, std::ofstream &torque_writer, std::ofstream &force_writer, float velocity, float LongAccel, float wheelTorque, float normalForceTotal)
