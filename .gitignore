@@ -1,0 +1,50 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+.vscode
+CMakeFiles/
+*.CMakeFiles
+*.cmake
+CMakeCache.txt
+TrackRun
+Testing/
+*.tcl
+cornering_output/
+accel_output/
+acceleration.txt
+torque.txt
+velocity.txt
+normal_force.txt
+src/RunTest
+obj/
+track_run_output/
